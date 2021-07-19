@@ -28,7 +28,7 @@ echo  "These are the .h files that will be compiled: "
 echo "${hs[@]}"
 echo ""
 
-read -p "Would you like proceed to generating the Makefile? [y/n]: " yn
+read -rp "Would you like proceed to generating the Makefile? [y/n]: " yn
 echo ""
 
 if [ "$yn" != y ]; then
@@ -55,42 +55,29 @@ fi
 echo "${cpps[@]}" | tr ' ' '\n' | cut -d '.' -f 1 > cpps.txt
 echo "${hs[@]}" | tr ' ' '\n' | cut -d '.' -f 1 > hs.txt
 
-for outputfile in $(cat cpps.txt); do
+while read -r outputfile; do
     echo "$outputfile.o" >> outputfile.txt
-done
+done < cpps.txt
 
 readarray -t outputarray < outputfile.txt
 
-echo -en "output: " >> Makefile
-echo -en "${outputarray[@]}" >> Makefile
-echo  "" >> Makefile
-echo -en "\tg++ " >> Makefile
-echo -en "${outputarray[@]}" >> Makefile
-echo -en " -o executable" >> Makefile
-echo "" >> Makefile
-echo "" >> Makefile
+output=$(echo -en "output: " ; echo -en "${outputarray[@]}" ; echo -en "\n" ; echo -en "\tg++ " ; echo -en "${outputarray[@]}" ; echo -en " -o executable" ; echo "")
+echo "$output " >> Makefile
 
-for line in $(cat cpps.txt); do
-    if [ "$line" = "$(cat hs.txt | grep "$line")" ]; then
-        echo "" >> Makefile
-        echo -en "$line.o: $line.cpp $line.h" >> Makefile
-        echo "" >> Makefile
-        echo -en "\tg++ -c $line.cpp" >> Makefile
-        echo "" >> Makefile
+while read -r line; do
+    if [ "$line" = "$(grep "$line" < hs.txt)" ]; then
+        output=$(echo -en "\n" ; echo -en "$line.o: $line.cpp $line.h" ; echo "" ; echo -en "\tg++ -c $line.cpp" ; echo -e "\n")
+        echo "$output" >> Makefile
     else
-        echo -en "$line.o: $line.cpp" >> Makefile
-        echo "" >> Makefile
-        echo -en "\tg++ -c $line.cpp" >> Makefile
-        echo "" >> Makefile
+        output=$(echo -en "\n" ; echo -en "$line.o: $line.cpp" ; echo "" ; echo -en "\tg++ -c $line.cpp" ; echo "")
+        echo "$output" >> Makefile
     fi
-done
+done < cpps.txt
 
-echo "" >> Makefile
-echo "clean:" >> Makefile
-echo -e "\trm *.o executable" >> Makefile
+output=$(echo "" ; echo "clean:" ; echo -e "\trm *.o executable")
+echo "$output" >> Makefile
 
 cat Makefile
 rm cpps.txt outputfile.txt hs.txt
-echo ""
 echo ""
 echo "Makefile Generated"

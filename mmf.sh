@@ -5,7 +5,7 @@
 # Last Modified: 19/7/2021
 
 # Description
-# This script creates a c/c++ MakeFile in the current working directory having the main located in a main.cpp file
+# This script creates a c/c++ MakeFile in the current working directory having the main located in a main.cpp file. Note: The the header and implementation files should all be in the same folder.
 
 # Usage
 # ./mmf.sh
@@ -81,3 +81,11 @@ cat Makefile
 rm cpps.txt outputfile.txt hs.txt
 echo ""
 echo "Makefile Generated"
+
+read -rp "Would you like to compile the executable? [y/n]: " yn
+if [ "$yn" != y ]; then
+    echo "Script Closed"
+    exit 0
+else
+    make "-j$(nproc)"
+fi

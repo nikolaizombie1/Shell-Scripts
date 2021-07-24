@@ -10,7 +10,9 @@ ___
 
 ___
 
-> automake autoconf bash
+``` sh
+ automake autoconf bash
+```
 
 ___
 
